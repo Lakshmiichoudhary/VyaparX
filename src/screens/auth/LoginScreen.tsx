@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,35 @@ import {
   StatusBar,
   TextInput,
 } from "react-native";
-
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { darkColors, lightColors } from "../../constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { auth } from "../../firebase/config";
+import Toast from "react-native-toast-message";
+import { getFirebaseErrorMessage } from "../../utils/FirebaseErrors";
 
 export const LoginScreen = ({ navigation }: any) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+
+      navigation.replace("MainTabs");
+      Toast.show({
+        type: "success",
+        text1: "Login Successful",
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: "Login Failed",
+        text2: getFirebaseErrorMessage(error.code),
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -46,6 +70,8 @@ export const LoginScreen = ({ navigation }: any) => {
               placeholder="Enter your email"
               placeholderTextColor="#9CA3AF"
               style={styles.input}
+              onChangeText={setEmail}
+              value={email}
             />
           </View>
 
@@ -57,19 +83,22 @@ export const LoginScreen = ({ navigation }: any) => {
               placeholderTextColor="#9CA3AF"
               secureTextEntry
               style={styles.input}
+              onChangeText={setPassword}
+              value={password}
             />
           </View>
 
-          
           <TouchableOpacity style={styles.forgotContainer}>
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-         
-          <TouchableOpacity activeOpacity={0.8} style={styles.primaryButton}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.primaryButton}
+            onPress={handleLogin}
+          >
             <Text style={styles.primaryButtonText}>Login</Text>
           </TouchableOpacity>
-
         </View>
       </View>
     </SafeAreaView>
@@ -82,7 +111,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: darkColors.background,
-    overflow: "hidden"
+    overflow: "hidden",
   },
 
   container: {
@@ -93,11 +122,10 @@ const styles = StyleSheet.create({
   },
 
   imageContainer: {
-   
-    height: 100 ,
+    height: 100,
     justifyContent: "center",
     alignItems: "center",
-    paddingTop:105    
+    paddingTop: 105,
   },
 
   image: {
@@ -116,7 +144,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 10,
-    alignItems: "center"
+    alignItems: "center",
   },
 
   title: {

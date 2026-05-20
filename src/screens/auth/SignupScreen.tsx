@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,8 +11,51 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { darkColors, lightColors } from "../../constants/colors";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../../firebase/config";
+import Toast from "react-native-toast-message";
+import { getFirebaseErrorMessage } from "../../utils/FirebaseErrors";
 
 export const SignupScreen = ({ navigation }: any) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSignup = async () => {
+    if (password !== confirmPassword) {
+      Toast.show({
+        type: "error",
+        text1: "Passwords do not match",
+      });
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+
+      await updateProfile(userCredential.user, {
+        displayName: name,
+      });
+
+      navigation.replace("MainTabs");
+      Toast.show({
+        type: "success",
+        text1: "Account Created",
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: "Signup Failed",
+        text2: getFirebaseErrorMessage(error.code),
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -40,7 +83,6 @@ export const SignupScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
 
-          {/* Full Name */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Full Name</Text>
 
@@ -48,10 +90,11 @@ export const SignupScreen = ({ navigation }: any) => {
               placeholder="Enter your full name"
               placeholderTextColor="#9CA3AF"
               style={styles.input}
+              value={name}
+              onChangeText={setName}
             />
           </View>
 
-          {/* Email */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
 
@@ -60,10 +103,11 @@ export const SignupScreen = ({ navigation }: any) => {
               placeholderTextColor="#9CA3AF"
               keyboardType="email-address"
               style={styles.input}
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
-          {/* Password */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Password</Text>
 
@@ -72,10 +116,11 @@ export const SignupScreen = ({ navigation }: any) => {
               placeholderTextColor="#9CA3AF"
               secureTextEntry
               style={styles.input}
+              value={password}
+              onChangeText={setPassword}
             />
           </View>
 
-          {/* Confirm Password */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Confirm Password</Text>
 
@@ -84,6 +129,8 @@ export const SignupScreen = ({ navigation }: any) => {
               placeholderTextColor="#9CA3AF"
               secureTextEntry
               style={styles.input}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
             />
           </View>
 
@@ -91,6 +138,7 @@ export const SignupScreen = ({ navigation }: any) => {
           <TouchableOpacity
             activeOpacity={0.8}
             style={styles.primaryButton}
+            onPress={handleSignup}
           >
             <Text style={styles.primaryButtonText}>Create Account</Text>
           </TouchableOpacity>
@@ -141,14 +189,14 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "800",
     color: lightColors.text,
   },
 
   loginText: {
     color: darkColors.primary,
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "700",
   },
 
