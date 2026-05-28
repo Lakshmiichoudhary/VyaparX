@@ -22,8 +22,6 @@ export const LoginScreen = ({ navigation }: any) => {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-
-      navigation.replace("MainTabs");
       Toast.show({
         type: "success",
         text1: "Login Successful",

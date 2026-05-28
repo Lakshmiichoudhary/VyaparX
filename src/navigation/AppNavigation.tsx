@@ -9,15 +9,22 @@ import BottomTabs from "./BottomTabs";
 import SignupScreen from "../screens/auth/SignupScreen";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "../firebase/config";
+import EditProfileScreen from "../screens/profile/EditProfileScreen";
 
 const Stack = createNativeStackNavigator();
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AppNavigator = () => {
   const [user, setUser] = useState<User | null>(null);
 
+  const [isGuest, setIsGuest] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    checkGuestMode();
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -26,25 +33,33 @@ const AppNavigator = () => {
     return unsubscribe;
   }, []);
 
-  if (loading) {
-    return null;
-  }
+  const checkGuestMode = async () => {
+    const guest = await AsyncStorage.getItem("guestMode");
+
+    if (guest === "true") {
+      setIsGuest(true);
+    }
+  };
+
+  if (loading) return null;
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!user ? (
+        {!user && !isGuest ? (
           <>
             <Stack.Screen name="Splash" component={SplashScreen} />
-
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-
             <Stack.Screen name="Login" component={LoginScreen} />
-
             <Stack.Screen name="Signup" component={SignupScreen} />
           </>
         ) : (
-          <Stack.Screen name="MainTabs" component={BottomTabs} />
+          <>
+            <Stack.Screen name="MainTabs">
+              {() => <BottomTabs isGuest={isGuest} />}
+            </Stack.Screen>
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

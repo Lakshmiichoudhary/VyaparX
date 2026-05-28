@@ -42,7 +42,6 @@ export const SignupScreen = ({ navigation }: any) => {
         displayName: name,
       });
 
-      navigation.replace("MainTabs");
       Toast.show({
         type: "success",
         text1: "Account Created",
@@ -55,7 +54,7 @@ export const SignupScreen = ({ navigation }: any) => {
       });
     }
   };
-
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar

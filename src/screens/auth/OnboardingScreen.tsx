@@ -9,8 +9,16 @@ import {
 } from "react-native";
 import { darkColors } from "../../constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OnboardingScreen = ({ navigation }: any) => {
+  
+  const handleSkip = async () => {
+    await AsyncStorage.setItem("guestMode", "true");
+
+    navigation.replace("MainTabs");
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -49,7 +57,7 @@ const OnboardingScreen = ({ navigation }: any) => {
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.secondaryButton}
-              onPress={() => navigation.replace("MainTabs")}
+              onPress={handleSkip}
             >
               <Text style={styles.secondaryButtonText}>Skip for now</Text>
             </TouchableOpacity>
